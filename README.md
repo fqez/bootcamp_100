@@ -1,9 +1,8 @@
-## Bootcamp 100 days of Pyton meets Java
+## Bootcamp 100 days of Pyton
 
 This repo will contain all de work proposed on the '100 Days of Code: The Complete Python Pro Bootcamp'.
 
-The main objective of this is to recreate all this work (whenever possible)
- in Java/Spring, to refresh the fundamentals.
+The main objective of this work is to refresh (and hopefuly learn new) concepts of Python in order to master the language. Starting with advanced level but refreshing basic concepts first.
 
  ### Repo structure 🔱
 
@@ -12,34 +11,22 @@ The main objective of this is to recreate all this work (whenever possible)
 
 <!-- This is for https://tree.nathanfriend.io/ edition
 
-src
-  python
-    README.md
-    config/
-      ...
-    src
-      a.py
-      b.py
-      x/
-        ...
-  java
-    README.md
-    config/
-      ...
-    com
-      java
-        myapp
-          a.java
-          b.java
-          x/
-            ...
 
-  Docker
-    docker-compose.yml
-    Dockerfile
-  scripts/
-    ...
-  *.env
+src
+  a.py
+  b.py
+  ...
+test
+  test_a.py
+  test_b.py
+  ...
+Docker?
+  docker-compose.yml
+  Dockerfile
+requirements.txt?
+setup.py?
+  ...
+*.env?
 
 
 -->
@@ -47,33 +34,21 @@ src
 
  ```
 .
-└── src/
-    ├── python/
-    │   ├── README.md
-    │   ├── config/
-    │   │   └── ...
-    │   └── src/
-    │       ├── a.py
-    │       ├── b.py
-    │       └── x/
-    │           └── ...
-    ├── java/
-    │   ├── README.md
-    │   ├── config/
-    │   │   └── ...
-    │   └── com/
-    │       └── java/
-    │           └── myapp/
-    │               ├── a.java
-    │               ├── b.java
-    │               └── x/
-    │                   └── ...
-    ├── Docker/
-    │   ├── docker-compose.yml
-    │   └── Dockerfile
-    ├── scripts/
-    │   └── ...
-    └── *.env
+├── src/
+│   ├── a.py
+│   ├── b.py
+│   └── ...
+├── test/
+│   ├── test_a.py
+│   ├── test_b.py
+│   └── ...
+├── Docker?/
+│   ├── docker-compose.yml
+│   └── Dockerfile
+├── requirements.txt?
+├── setup.py?/
+│   └── ...
+└── *.env?
   ```
 
 Each day will have its own separate tag with the following format: `day X - [some description]`. The tag will contain the actual source code of each day exercises both in java and python. The branching strategy will be as follows:
