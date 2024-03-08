@@ -12,65 +12,68 @@ The main objective of this is to recreate all this work (whenever possible)
 
 <!-- This is for https://tree.nathanfriend.io/ edition
 
-python
-  README.md
-  config/
-    ...
-  src
-    a.py
-    b.py
-    x/
+src
+  python
+    README.md
+    config/
       ...
-java
-  README.md
-  config/
-    ...
-  com
-    java
-      myapp
-        a.java
-        b.java
-        x/
-          ...
+    src
+      a.py
+      b.py
+      x/
+        ...
+  java
+    README.md
+    config/
+      ...
+    com
+      java
+        myapp
+          a.java
+          b.java
+          x/
+            ...
 
-Docker
-  docker-compose.yml
-  Dockerfile
-scripts/
-  ...
-*.env
+  Docker
+    docker-compose.yml
+    Dockerfile
+  scripts/
+    ...
+  *.env
+
 
 -->
 
 
  ```
 .
-├── python/
-│   ├── README.md
-│   ├── config/
-│   │   └── ...
-│   └── src/
-│       ├── a.py
-│       ├── b.py
-│       └── x/
-│           └── ...
-├── java/
-│   ├── README.md
-│   ├── config/
-│   │   └── ...
-│   └── com/
-│       └── java/
-│           └── myapp/
-│               ├── a.java
-│               ├── b.java
-│               └── x/
-│                   └── ...
-├── Docker/
-│   ├── docker-compose.yml
-│   └── Dockerfile
-├── scripts/
-│   └── ...
-└── *.env
+└── src/
+    ├── python/
+    │   ├── README.md
+    │   ├── config/
+    │   │   └── ...
+    │   └── src/
+    │       ├── a.py
+    │       ├── b.py
+    │       └── x/
+    │           └── ...
+    ├── java/
+    │   ├── README.md
+    │   ├── config/
+    │   │   └── ...
+    │   └── com/
+    │       └── java/
+    │           └── myapp/
+    │               ├── a.java
+    │               ├── b.java
+    │               └── x/
+    │                   └── ...
+    ├── Docker/
+    │   ├── docker-compose.yml
+    │   └── Dockerfile
+    ├── scripts/
+    │   └── ...
+    └── *.env
   ```
 
 Each day will have its own separate tag with the following format: `day X - [some description]`. The tag will contain the actual source code of each day exercises both in java and python. The branching strategy will be as follows:
