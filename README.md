@@ -11,7 +11,6 @@ The main objective of this work is to refresh (and hopefuly learn new) concepts 
 
 <!-- This is for https://tree.nathanfriend.io/ edition
 
-
 src
   a.py
   b.py
@@ -27,7 +26,6 @@ requirements.txt?
 setup.py?
   ...
 *.env?
-
 
 -->
 
