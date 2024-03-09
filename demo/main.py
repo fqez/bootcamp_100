@@ -28,11 +28,11 @@ MENU: Dict[str, Dict[str, Any]] = {
     }
 }
 
+balance = 0
 resources: Dict[str, Dict[str, Any]] = {
     "water": {"amount": 300, "unit": "ml", "default": 300},
     "milk": {"amount": 200, "unit": "ml", "default": 200},
     "coffee": {"amount": 100, "unit": "g", "default": 100},
-    "money": {"amount": 0, "unit": "€"}
 }
 
 
@@ -40,6 +40,7 @@ def print_report() -> None:
     """Prints the current status of resources."""
     for key, value in resources.items():
         print(f"{key.capitalize()}: {value['amount']}{value['unit']}")
+    print(f"Money: {balance}€")
 
 
 def refill() -> None:
@@ -58,16 +59,10 @@ def check_enough_resources(choice: str) -> bool:
     Returns:
         True if there are enough resources, False otherwise.
     """
-    if (resources['water']['amount'] - MENU[choice]['ingredients']['water'] <= 0):
-        print("There's not enough water")
-        return False
-    elif (resources['coffee']['amount'] - MENU[choice]['ingredients']['coffee'] <= 0):
-        print("There's not enough coffee")
-        return False
-    elif (resources['milk']['amount'] - MENU[choice]['ingredients']['milk'] <= 0):
-        print("There's not enough milk")
-        return False
-
+    for item in MENU[choice]['ingredients']:
+        if resources[item]['amount'] < MENU[choice]['ingredients'][item]:
+            print(f"Sorry, there is not enough {item}.")
+            return False
     return True
 
 
@@ -81,10 +76,10 @@ def update_resources(choice: str, qty: float) -> None:
     Returns:
         None
     """
-    resources['water']['amount'] -= MENU[choice]['ingredients']['water']
-    resources['coffee']['amount'] -= MENU[choice]['ingredients']['coffee']
-    resources['milk']['amount'] -= MENU[choice]['ingredients']['milk']
-    resources['money']['amount'] += MENU[choice]['cost']
+    for item in MENU[choice]['ingredients']:
+        resources[item]['amount'] -= MENU[choice]['ingredients'][item]
+    global balance
+    balance += MENU[choice]['cost']
 
 
 def process_selection(choice: str) -> bool:
