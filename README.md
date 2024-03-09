@@ -6,7 +6,7 @@ The main objective of this work is to refresh (and hopefuly learn new) concepts 
 
  ### Repo structure 🔱
 
- The `main` branch will contain the basic structure of each daywork, but it's just the scafolding for the work itself.
+ The `Day-0` tag will contain the basic structure of each daywork, but it's just the scafolding for the work itself.
 
 
 <!-- This is for https://tree.nathanfriend.io/ edition
