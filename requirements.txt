@@ -1,1 +1,2 @@
 # Add your project dependencies here
+colorgram.py==1.2.0
