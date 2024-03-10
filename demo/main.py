@@ -1,104 +1,93 @@
 import random
-import turtle as t
-from enum import Enum
-import colorgram
+from turtle import Turtle, Screen
 
-
-# Iterator not needed, but just for trying
-COLOURS: list[str] = [
-    "CornflowerBlue",
-    "DarkOrchid",
-    "IndianRed",
-    "DeepSkyBlue",
-    "LightSeaGreen",
-    "wheat",
-    "SlateGray",
-    "SeaGreen",
+# Constants
+STEP = 5
+COLORS = [
+    "red",
+    "green",
+    "blue",
+    "orange",
+    "pink",
+    "magenta",
+    "cyan",
+    "yellow",
+    "purple",
+    "brown",
+    "white",
+    "gray",
+    "lightblue",
+    "lime",
+    "teal",
+    "olive",
+    "maroon",
+    "navy",
+    "silver",
 ]
-DIRECTIONS = [0, 90, 180, 270]  # East, North, West, South
+WIDTH = 800
+HEIGHT = 600
+OFFSET = 150
+FINISH_LINE = WIDTH // 2 - OFFSET
+START_X = -350
+NUM_RUNNERS = 5
 
 
-class SHAPES(Enum):
-    TRIANGLE = 3
-    SQUARE = 4
-    PENTAGON = 5
-    HEXAGON = 6
-    HEPTAGON = 7
-    OCTAGON = 8
-    NONAGON = 9
-    DECAGON = 10
+class Runner(Turtle):
+    def __init__(self, color, start_y):
+        super().__init__(shape="turtle")
+        self.color(color)
+        self.penup()
+        self.speed("fastest")
+        self.teleport(START_X, start_y)
 
 
-def generate_random_color():
+class TurtleRace:
+    def __init__(self, num_runners=NUM_RUNNERS):
+        self.screen = Screen()
+        self.screen.setup(width=WIDTH, height=HEIGHT)
+        self.user_bet = self.screen.textinput(
+            title="Make your bet!",
+            prompt="Which turtle will win the race? (choose the color): ",
+        )
+        self.create_referee()
+        self.runners = self.create_runners(num_runners)
 
-    # return (random.randrange(0, 255) / 255, random.randint(0,255) / 255, random.randint(0,255) /255)
-    return (random.randrange(0, 255), random.randint(0, 255), random.randint(0, 255))
+    def create_runners(self, n):
+        start = HEIGHT // 2 - OFFSET
+        step = (start * 2) // n
+        return [Runner(COLORS[i], start - (i * step)) for i in range(n)]
+
+    def create_referee(self):
+        referee = Turtle(shape="turtle")
+        referee.color("black")
+        referee.teleport(x=FINISH_LINE, y=WIDTH // 2 - OFFSET)
+        referee.setheading(270)
+        referee.forward(HEIGHT - OFFSET)
+        referee.setheading(90)
+
+    def check_winner(self, runner):
+        if runner.xcor() > FINISH_LINE:
+            winning_color = runner.pencolor()
+            if winning_color == self.user_bet:
+                print(f"You've won! The {winning_color} turtle is the winner!")
+
+            else:
+                print(f"You've lost! The {winning_color} turtle is the winner!")
+            return True
+        return False
+
+    def start_race(self):
+        while True:
+            for runner in self.runners:
+                if self.check_winner(runner):
+                    return
+                runner.forward(random.randint(0, STEP))
 
 
-def draw_shape(sides: SHAPES, artist: t.Turtle) -> None:
-    """
-    Draw a shape with the given number of sides using the turtle.
-    """
-    angle = int(360 / sides.value)
-    for _ in range(sides.value):
-        artist.forward(100)
-        artist.right(angle)
-
-
-def random_walk(steps: int, artist: t.Turtle) -> None:
-    """
-    Perform a random walk with the turtle for the given number of steps.
-    """
-
-    for _ in range(steps):
-        direction = random.choice(DIRECTIONS)
-        artist.color(generate_random_color())
-        artist.setheading(direction)
-        artist.forward(50)
-
-
-def draw_spirograph(gap: int, artist: t.Turtle) -> None:
-
-    offset = 360 / gap
-    for i in range(gap):
-        artist.color(generate_random_color())
-        artist.circle(100)
-        artist.seth(artist.heading() + offset)
-
-
-def modern_artist(artist: t.Turtle, size: int = 10, dot_size: int = 20):
-
-    colors = colorgram.extract("image.jpg", 15)
-
-    for i in range(size * size):
-        x = i // size
-        y = i % size
-        color = random.choice(colors).rgb
-        artist.dot(dot_size, color)
-        artist.teleport(y * (dot_size * 2), x * (dot_size * 2))
+def main():
+    race = TurtleRace()
+    race.start_race()
 
 
 if __name__ == "__main__":
-
-    espartaco = t.Turtle()
-    screen = t.Screen()
-
-    espartaco.shape("turtle")
-    espartaco.pensize(8)
-    espartaco.speed("fastest")
-
-    screen.colormode(255)
-
-    # Uncomment the following lines to draw shapes
-    # colors = colorgram.extract('image.jpg', 10)
-    # for shape in SHAPES:
-    #     espartaco.color(random.choice(colors).rgb)
-    #     draw_shape(shape, espartaco)
-
-    # random_walk(250, espartaco)
-
-    # draw_spirograph(100, espartaco)
-
-    modern_artist(artist=espartaco)
-
-    screen.exitonclick()
+    main()
