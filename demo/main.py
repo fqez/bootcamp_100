@@ -1,14 +1,17 @@
 import time
-from turtle import Screen
+from turtle import Screen, Turtle
 
-from food import Food
+from ball import Ball
+from constants import (
+    BALL_OFFSET,
+    GOAL_OFFSET,
+    HEIGHT,
+    PADDLE_OFFSET,
+    WIDTH,
+    WIDTH_OFFSET,
+)
+from paddle import Paddle
 from scoreboard import Scoreboard
-from snake import DIRECTIONS, Snake
-
-# Constants
-WIDTH = 600
-HEIGHT = 600
-SEGMENT_SIZE = 20
 
 
 class Game:
@@ -20,39 +23,38 @@ class Game:
         self.screen.setup(width=WIDTH, height=HEIGHT)
         self.screen.tracer(0)
         self.screen.bgcolor("black")
-        self.screen.title("Snake Game!🐍")
+        self.screen.title("Pong")
 
-        self.fps = 12
+        self.fps = 30
 
-        self.init_game_control_bindings()
-
-        self.snake = Snake()
-        self.food = Food(WIDTH, HEIGHT)
+        self.r_paddle = Paddle((WIDTH // 2 - WIDTH_OFFSET, 0))
+        self.l_paddle = Paddle((-WIDTH // 2 + WIDTH_OFFSET, 0))
+        self.ball = Ball()
         self.scoreboard = Scoreboard()
 
-    @property
-    def check_food(self) -> bool:
+        self.init_game_control_bindings()
+        self.draw_dashed_line()
+
+    def draw_dashed_line(self):
         """
-        Check if the snake has reached the food.
-        Returns:
-            bool: True if the snake has reached the food, False otherwise.
+        Draw a vertical dashed line in the middle of the screen from top to bottom.
         """
-        return True if self.snake.head.distance(self.food.pos()) <= 15 else False
+        dashed_turtle = Turtle()
+        dashed_turtle.penup()
+        dashed_turtle.goto(0, HEIGHT // 2)  # Start at the top of the screen
+        dashed_turtle.setheading(270)  # Point the turtle downwards
+        dashed_turtle.pendown()
+        dashed_turtle.pensize(3)
+        dashed_turtle.color("white")
 
-    @property
-    def check_collision(self):
-        """Check if the snake has collided with the border or its tail."""
-        xc, yc = self.snake.head.xcor(), self.snake.head.ycor()
-        horizontal_border = WIDTH // 2 - SEGMENT_SIZE
-        vertical_border = HEIGHT // 2 - SEGMENT_SIZE
+        for _ in range(HEIGHT // 20):
+            # Adjust the range based on the height of the screen and the length of the dashes
+            dashed_turtle.forward(10)
+            dashed_turtle.penup()
+            dashed_turtle.forward(10)
+            dashed_turtle.pendown()
 
-        if abs(xc) > horizontal_border or abs(yc) > vertical_border:
-            return True
-
-        return any(
-            self.snake.head.distance(segment) < 10
-            for segment in self.snake.segments[1:]
-        )
+        dashed_turtle.hideturtle()
 
     def game_start(self):
         """
@@ -64,17 +66,15 @@ class Game:
 
             start_time = time.time()  # Record the start time of the frame
 
-            self.snake.move()
-            if self.check_collision:
-                self.scoreboard.game_over()
-                break
-
-            if self.check_food:
+            self.ball.move()
+            self.detect_collision()
+            if self.detect_goal():
+                self.ball.reset_position()
+                self.screen.update()
+                time.sleep(1)
                 self.scoreboard.update_score()
-                self.food.create_new()
-                self.snake.create_new_piece()
-            self.screen.update()
 
+            self.screen.update()
             # Calculate how long the frame took to process
             frame_time = time.time() - start_time
 
@@ -82,28 +82,56 @@ class Game:
             if frame_time < frame_delay:
                 time.sleep(frame_delay - frame_time)
 
+    def detect_goal(self):
+        if self.ball.xcor() > WIDTH // 2 - GOAL_OFFSET:
+            self.scoreboard.point("L")
+            return True
+
+        if self.ball.xcor() < -WIDTH // 2 + GOAL_OFFSET:
+            self.scoreboard.point("R")
+            return True
+
+        return False
+
+    def detect_collision(self):
+
+        # detect collision with top or bottom
+        if (
+            self.ball.ycor() > HEIGHT // 2 - BALL_OFFSET
+            or self.ball.ycor() < -HEIGHT // 2 + BALL_OFFSET
+        ):
+            self.ball.bounce_y()
+
+        if (
+            self.ball.distance(self.r_paddle) < 50
+            and self.ball.xcor() > WIDTH // 2 - PADDLE_OFFSET
+        ) or (
+            self.ball.distance(self.l_paddle) < 50
+            and self.ball.xcor() < -WIDTH // 2 + PADDLE_OFFSET
+        ):
+            self.ball.bounce_x()
+
     def init_game_control_bindings(self):
         """Initialize game control bindings."""
         self.screen.listen()
         key_mapping = {
-            "Up": DIRECTIONS.UP,
-            "Down": DIRECTIONS.DOWN,
-            "Left": DIRECTIONS.LEFT,
-            "Right": DIRECTIONS.RIGHT,
+            "Up": self.r_paddle.go_up,
+            "Down": self.r_paddle.go_down,
+            "w": self.l_paddle.go_up,
+            "s": self.l_paddle.go_down,
+            "q": self.screen.bye,
         }
-        for key, direction in key_mapping.items():
-            self.screen.onkey(
-                fun=lambda dir=direction: self.snake.change_direction(dir), key=key
-            )
+        for key, fnct in key_mapping.items():
+            self.screen.onkeypress(fun=fnct, key=key)
 
 
 def main():
     """
     Main function to start the game.
     """
-    snake = Game()
-    snake.game_start()
-    snake.screen.exitonclick()
+    pong = Game()
+    pong.game_start()
+    pong.screen.exitonclick()
 
 
 if __name__ == "__main__":
