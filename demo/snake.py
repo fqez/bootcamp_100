@@ -34,6 +34,9 @@ class Snake:
 
     def __init__(self):
         """Initialize the snake."""
+        self.create_snake()
+
+    def create_snake(self):
         self.segments = [
             self._create_piece(pos_x=-i * SEGMENT_SIZE, pos_y=0) for i in range(3)
         ]
@@ -62,3 +65,9 @@ class Snake:
     def _create_piece(self, pos_x=0, pos_y=0, position=None):
         """Create a new piece."""
         return Piece(pos_x=pos_x, pos_y=pos_y, position=position)
+
+    def reset(self):
+        for segment in self.segments:
+            segment.hideturtle()
+        self.segments.clear()
+        self.__init__()
