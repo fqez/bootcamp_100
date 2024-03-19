@@ -1,0 +1,33 @@
+QMainWindow {
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+/* Set the background color, text color, and border for buttons */
+QPushButton {
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 1px solid #707070;
+}
+
+/* Change the button color when the mouse pointer is over it */
+QPushButton:hover {
+    background-color: #707070;
+}
+
+/* Set the background color, text color, and border for line edits */
+QLineEdit {
+    background-color: #FFFFFF;
+    color: #000000;
+    border: 1px solid #707070;
+}
+
+/* Set the color of labels */
+QLabel {
+    color: #000000;
+}
+#error_label {
+    color: red;
+    font-size: 20px;
+    font-family: "Monospace";
+}

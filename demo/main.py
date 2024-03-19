@@ -1,258 +1,149 @@
 import sys
+from typing import Optional
 
-from PyQt6.QtCore import QPoint, QPropertyAnimation, QRect, QSize, Qt, pyqtProperty
-from PyQt6.QtGui import QBrush, QColor, QFont, QPainter
-from PyQt6.QtWidgets import (
-    QApplication,
-    QComboBox,
-    QHBoxLayout,
-    QLabel,
-    QLineEdit,
-    QMainWindow,
-    QPushButton,
-    QSizePolicy,
-    QVBoxLayout,
-    QWidget,
-)
+from pomodoro import Pomodoro
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QMouseEvent
+from PyQt6.QtWidgets import QApplication, QMainWindow
+from ui import UI
 
-WINDOW_WIDTH = 400
-WINDOW_HEIGHT = 200
-FONT_SIZE = 12
-FONT_WEIGHT = QFont.Weight.Bold
-FONT = QFont("Fira Code", FONT_SIZE, FONT_WEIGHT)
-
-THEMES = {
-    "light": """
-                QWidget {
-                    background-color: #ffffff;
-                    color: #000000;
-                }
-                QLabel {
-                    color: #000000;
-                }
-                QLabel:hover {
-                    color: #ff0000;
-                }
-                QLineEdit {
-                    background-color: #ffffff;
-                    color: #000000;
-                    border: 1px solid #000000;
-                    border-radius: 3px;
-                }
-                QLineEdit:focus {
-                    border: 1px solid #0000ff;
-                }
-                QPushButton {
-                    border-radius: 17;
-                    border: 1px solid black;
-                    background-color: #fff;
-                }
-                QPushButton:hover {
-                    color: #000;
-                    background-color: #f0f0f0;
-                }
-
-            """,
-    "dark": """
-                QWidget {
-                    background-color: #2b2b2b;
-                    color: #ffffff;
-                }
-                QLabel {
-                    color: #ffffff;
-                }
-                QLabel:hover {
-                    color: #ff0000;
-                }
-                QLineEdit {
-                    background-color: #2b2b2b;
-                    color: #ffffff;
-                    border: 1px solid #ffffff;
-                    border-radius: 3px;
-                }
-                QLineEdit:focus {
-                    border: 1px solid #ff0000;
-                }
-                QPushButton {
-                    border-radius: 17;
-                    border: 1px solid black;
-                    background-color: #2b2b2b;
-                }
-                QPushButton:hover {
-                    color: #fff;
-                    background-color: #515151;
-                }
-            """,
-}
+"""
+TODO : When the timer stops, make a beep and change the background image.
+TODO : Add button to the left of the play button to switch background randomly
+TODO : Add settings button and refactor to make this StackedLayout
+TODO : Create a simple spotify widget to the right of the screen
+TODO : Refactor themes. Delete slider and create a name label instead
+"""
 
 
-class AnimatedToggleButton(QPushButton):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setCheckable(True)
-        self.setMaximumWidth(20)
-        self.setMaximumHeight(12)
+class MainWindow(QMainWindow, UI):
+    """
+    Main window class for the Pomodoro application.
+    """
 
-        self._offset = 0
+    def __init__(self, pomodoro: Pomodoro):
+        """
+        Initialize the main window.
 
-        # Create the animation
-        self._animation = QPropertyAnimation(self, b"offset", self)
-        self._animation.setDuration(100)  # Duration in milliseconds
-        self._animation.setStartValue(0)
-        self._animation.setEndValue(1)
-
-        self.clicked.connect(self._animate)
-
-    def _animate(self):
-        if self.isChecked():
-            self._animation.setDirection(QPropertyAnimation.Direction.Forward)
-        else:
-            self._animation.setDirection(QPropertyAnimation.Direction.Backward)
-        self._animation.start()
-
-    def paintEvent(self, event):
-
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-
-        # Draw the background
-        background = (
-            QColor(119, 119, 119) if self.isChecked() else QColor(221, 221, 221)
-        )
-        painter.setBrush(QBrush(background))
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.drawRoundedRect(0, 0, self.width(), self.height(), 12, 12)
-
-        # Draw the circle
-        circle_color = QColor(255, 255, 255) if self.isChecked() else QColor(43, 43, 43)
-        painter.setBrush(QBrush(circle_color))
-        painter.setPen(Qt.PenStyle.NoPen)
-
-        offset = (
-            self._animation.currentValue()
-            if self._animation.state() == QPropertyAnimation.State.Running
-            else int(self.isChecked())
-        )
-        circle_x = int(offset * (self.width() - self.height()))  # Convert to int
-        painter.drawEllipse(circle_x, 0, self.height(), self.height())
-
-    def sizeHint(self):
-        return QSize(50, 24)
-
-    @pyqtProperty(float)
-    def offset(self):
-        return self._offset
-
-    @offset.setter
-    def offset(self, value):
-        self._offset = value
-        self.update()
-
-
-class ComboBoxLineEdit(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.layout = QHBoxLayout(self)
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.setSpacing(0)
-
-        self.lineEdit = QLineEdit(self)
-        self.comboBox = QComboBox(self)
-
-        self.layout.addWidget(self.lineEdit)
-        self.layout.addWidget(self.comboBox)
-
-        self.lineEdit.textChanged.connect(self.updateComboBox)
-
-    def updateComboBox(self, text):
-        # Update the combo box items based on the line edit text
-        # This is just an example, replace with your own logic
-        self.comboBox.clear()
-        self.comboBox.addItem(text)
-        self.comboBox.addItem(text + " item 2")
-        self.comboBox.addItem(text + " item 3")
-
-
-class MainWindow(QMainWindow):
-    def __init__(self):
+        Args:
+            pomodoro (Pomodoro): The Pomodoro instance.
+        """
         super().__init__()
-        self.setWindowTitle("PyQt6 Application")
-        self.setFixedSize(WINDOW_WIDTH, WINDOW_HEIGHT)
+
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
+        self.setMinimumHeight(550)
 
-        self.current_theme = "light"
-        self.setStyleSheet(THEMES[self.current_theme])
+        self.theme = "dark"
+        # Set the dark theme
+        self.setTheme(self.theme)
 
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-        self.layout = QVBoxLayout()
-        self.TitleLayout = QHBoxLayout()
+        self.short_break = True
+        self.offset: Optional[QMouseEvent] = None
+        self.pomodoro = pomodoro
 
-        # creating a push button
-        button = QPushButton("⇵", self)
-        button.setFont(QFont("Fira Code", 16, QFont.Weight.Medium))
+        self.setup_ui(self)
 
-        # setting geometry of button
-        button.setGeometry(self.width() // 2 - 20, self.height() // 2 - 10, 35, 35)
+        self.start_stop_button.clicked.connect(self.start_stop_timer)
+        self.toggle_break.clicked.connect(self.switch_break)
+        self.close_label.mousePressEvent = self.close_window
+        self.timer_widget.timer_finished.connect(self.on_timer_finished)
 
-        # adding action to a button
-        button.clicked.connect(self.clickme)
-        button.raise_()
+    def setTheme(self, theme_name: str):
+        """
+        Set the application theme.
 
-        self.create_title()
-        self.input1 = ComboBoxLineEdit()
+        Args:
+            theme_name (str): The name of the theme.
+        """
+        # Set the application style to Fusion
+        with open(f"./styles/{theme_name}.qss", "r") as f:
+            style = f.read()
+            self.setStyleSheet(style)
 
-        self.input2 = QLineEdit("kilómetros")
-        self.input2.setMinimumHeight(25)
-        self.input2.setFont(FONT)
-        self.input2.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.layout.addStretch(1)
-        self.layout.addWidget(self.input1)
-        self.layout.addStretch(1)
-        self.layout.addWidget(self.input2)
-        self.layout.addStretch(1)
+    def start_stop_timer(self):
+        """
+        Start or stop the timer based on its current state.
+        """
+        if self.timer_widget.is_timer_running():
+            self.start_stop_button.setIcon(self.icon_play)
+            self.timer_widget.stop_timer()
+            self.timer_widget.reset_timer()
+        else:
+            self.start_stop_button.setIcon(self.icon_reset)
+            self.timer_widget.start_timer()
+        self.timer_widget.update()
 
-        self.layout.addLayout(self.TitleLayout)
-        self.central_widget.setLayout(self.layout)
+    def resizeEvent(self, event):
+        """
+        Resize the window and the background image.
 
-    def clickme(self):
-        number = int(self.input1.lineEdit.text()) * 1.609
-        self.input2.setText(str("{:.2f}".format(number)))
+        Args:
+            event: The resize event.
+        """
+        # Resize the QLabel to fit the window
+        self.background_image.resize(event.size())
 
-    def switch_themes(self, event):
-        self.current_theme = "dark" if self.current_theme == "light" else "light"
-        self.setStyleSheet(THEMES[self.current_theme])
+        # Resize the QMovie to fit the window
+        self.background_movie.setScaledSize(event.size())
 
-    def create_title(self):
-        """Create a label that closes the window when clicked."""
-        close_label = QLabel("X", self)
-        title_label = QLabel("Conversor", self)
-        close_label.setFont(FONT)
-        title_label.setFont(FONT)
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        close_label.mousePressEvent = self.close_window
+    def switch_break(self):
+        """
+        Switch between short break and long break.
+        """
+        self.short_break = not self.short_break
 
-        self.toggle_button = AnimatedToggleButton()
-        self.toggle_button.clicked.connect(self.switch_themes)
-
-        h_layout = QHBoxLayout()
-        h_layout.addStretch(1)
-        h_layout.addWidget(title_label)
-        h_layout.addStretch(1)
-
-        h_layout.addWidget(self.toggle_button)
-        h_layout.addWidget(close_label)
-
-        self.layout.addLayout(h_layout)
+    def on_timer_finished(self):
+        """
+        Handle the timer finished event.
+        """
+        self.timer_widget.new_segment(*self.pomodoro.next_segment())
 
     def close_window(self, event):
-        """Close the window."""
+        """
+        Close the window.
+
+        Args:
+            event: The mouse press event.
+        """
         self.close()
+
+    def mousePressEvent(self, event: QMouseEvent):
+        """
+        Handle the mouse press event.
+
+        Args:
+            event (QMouseEvent): The mouse press event.
+        """
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.draggable = True
+            self.offset = event.pos()
+
+    def mouseMoveEvent(self, event: QMouseEvent):
+        """
+        Handle the mouse move event.
+
+        Args:
+            event (QMouseEvent): The mouse move event.
+        """
+        if self.draggable:
+            self.move(event.globalPos() - self.offset)
+
+    def mouseReleaseEvent(self, event: QMouseEvent):
+        """
+        Handle the mouse release event.
+
+        Args:
+            event (QMouseEvent): The mouse release event.
+        """
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.draggable = False
+            self.offset = None
 
 
 if __name__ == "__main__":
+
     app = QApplication(sys.argv)
-    window = MainWindow()
+    pomodoro = Pomodoro()
+    window = MainWindow(pomodoro)
     window.show()
     sys.exit(app.exec())
